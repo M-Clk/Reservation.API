@@ -32,13 +32,13 @@ namespace Reservation.API.Controllers
                 if(!request.KisilerFarkliVagonlaraYerlestirilebilir && bosYer > request.RezervasyonYapilacakKisiSayisi)
                 {
                     response.YerlesimAyrinti.Add(new VagonYerlesimResponse { VagonAdi = vagon.Ad, KisiSayisi = bosYer });
+                    response.RezervasyonYapilabilir = true;
                     return response;
                 }
                 else if(request.KisilerFarkliVagonlaraYerlestirilebilir)
                 {
                     if(bosYer > request.RezervasyonYapilacakKisiSayisi)
                     {
-
                         response.YerlesimAyrinti.Add(new VagonYerlesimResponse { VagonAdi = vagon.Ad, KisiSayisi = request.RezervasyonYapilacakKisiSayisi });
                         return response;
                     }
@@ -51,6 +51,8 @@ namespace Reservation.API.Controllers
                 response.RezervasyonYapilabilir = false;
                 response.YerlesimAyrinti.Clear();
             }
+            else
+                response.RezervasyonYapilabilir = true;
             return response;
         }
     }
