@@ -18,7 +18,7 @@ namespace Reservation.API
                         {
                             Ad = "1 Numara",
                             DoluKoltukAdet = 49,
-                            Kapasite = 75,
+                            Kapasite = 75
                         },
                         new Vagon
                         {

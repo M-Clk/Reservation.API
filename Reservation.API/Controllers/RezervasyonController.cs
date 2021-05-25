@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Reservation.API.Entities;
 using Reservation.API.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace Reservation.API.Controllers
             var tren = _reservationDbContext.Trens.FirstOrDefault(t => t.Ad.Contains(request.Tren.Ad) && t.Vagonlar.Any(v => v.Kapasite * 70 / 100 > v.DoluKoltukAdet));
             if(tren == null)
                 return response;
-
+            Dictionary<string, int> vagonYeniKisiler = new Dictionary<string, int>();
             foreach(var vagon in tren.Vagonlar)
             {
                 var bosYer = vagon.Kapasite * 70 / 100 - vagon.DoluKoltukAdet;
@@ -33,6 +34,8 @@ namespace Reservation.API.Controllers
                 {
                     response.YerlesimAyrinti.Add(new VagonYerlesimResponse { VagonAdi = vagon.Ad, KisiSayisi = request.RezervasyonYapilacakKisiSayisi });
                     response.RezervasyonYapilabilir = true;
+                    vagonYeniKisiler.Add(vagon.Ad, request.RezervasyonYapilacakKisiSayisi);
+                    VagonKapsiteGuncelle(tren.Ad, vagonYeniKisiler);
                     return response;
                 }
                 else if(request.KisilerFarkliVagonlaraYerlestirilebilir)
@@ -41,10 +44,13 @@ namespace Reservation.API.Controllers
                     {
                         response.YerlesimAyrinti.Add(new VagonYerlesimResponse { VagonAdi = vagon.Ad, KisiSayisi = request.RezervasyonYapilacakKisiSayisi });
                         response.RezervasyonYapilabilir = true;
+                        vagonYeniKisiler.Add(vagon.Ad, request.RezervasyonYapilacakKisiSayisi);
+                        VagonKapsiteGuncelle(tren.Ad, vagonYeniKisiler);
                         return response;
                     }
                     response.YerlesimAyrinti.Add(new VagonYerlesimResponse { VagonAdi = vagon.Ad, KisiSayisi = bosYer });
                     request.RezervasyonYapilacakKisiSayisi -= bosYer;
+                    vagonYeniKisiler.Add(vagon.Ad, bosYer);
                 }
             }
             if(request.RezervasyonYapilacakKisiSayisi > 0)
@@ -54,9 +60,16 @@ namespace Reservation.API.Controllers
             }
             else
             {
+                VagonKapsiteGuncelle(tren.Ad, vagonYeniKisiler);
                 response.RezervasyonYapilabilir = true;
             }
             return response;
+        }
+        private void VagonKapsiteGuncelle(string trenAdi, Dictionary<string, int> vagonYeniKisiler)
+        {
+            var toBeUpdatedTren = _reservationDbContext.Trens.First(t => t.Ad == trenAdi);
+            foreach(var vagonKisiSayisi in vagonYeniKisiler)
+                toBeUpdatedTren.Vagonlar.First(v => v.Ad == vagonKisiSayisi.Key).DoluKoltukAdet += vagonKisiSayisi.Value;
         }
     }
 }

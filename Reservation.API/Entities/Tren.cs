@@ -5,6 +5,6 @@ namespace Reservation.API.Entities
     public class Tren
     {
         public string Ad { get; set; }
-        public IEnumerable<Vagon> Vagonlar { get; set; }
+        public List<Vagon> Vagonlar { get; set; }
     }
 }

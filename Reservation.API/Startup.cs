@@ -19,7 +19,7 @@ namespace Reservation.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddDbContext<ReservationDbContext>();
+            services.AddDbContext<ReservationDbContext>(ServiceLifetime.Singleton);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
